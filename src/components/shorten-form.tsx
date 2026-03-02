@@ -1,17 +1,19 @@
+
 "use client";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Link2, Clock, Hash, AlertCircle, CheckCircle2, Copy, Loader2 } from "lucide-react";
+import { Link2, Clock, Hash, CheckCircle2, Copy, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { createLink } from "@/lib/db";
 import { moderateCustomAlias } from "@/ai/flows/alias-moderation-flow";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { useFirestore } from "@/firebase";
 
 const formSchema = z.object({
   url: z.string().url({ message: "Please enter a valid URL (include http/https)" }),
@@ -23,6 +25,7 @@ export function ShortenForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const { toast } = useToast();
+  const db = useFirestore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -38,6 +41,8 @@ export function ShortenForm() {
     setResult(null);
 
     try {
+      let shortCode = values.customAlias || Math.random().toString(36).substring(2, 8);
+      
       if (values.customAlias) {
         const moderation = await moderateCustomAlias({ alias: values.customAlias });
         if (moderation.isModerated) {
@@ -51,8 +56,24 @@ export function ShortenForm() {
         }
       }
 
-      const link = createLink(values.url, values.customAlias, values.expireAt);
-      const shortUrl = `${window.location.origin}/r/${link.shortCode}`;
+      // Canonicalize URL
+      let targetUrl = values.url;
+      if (!targetUrl.startsWith('http')) {
+        targetUrl = `https://${targetUrl}`;
+      }
+
+      const linkRef = doc(db, "public_urls", shortCode);
+      
+      await setDoc(linkRef, {
+        id: shortCode,
+        shortCode: shortCode,
+        originalUrl: targetUrl,
+        createdAt: serverTimestamp(),
+        expireAt: values.expireAt ? new Date(values.expireAt).toISOString() : null,
+        userId: null // Public link
+      });
+
+      const shortUrl = `${window.location.origin}/r/${shortCode}`;
       setResult(shortUrl);
       toast({
         title: "Success!",

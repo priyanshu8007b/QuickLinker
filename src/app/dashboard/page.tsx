@@ -1,26 +1,31 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { 
   Zap, Plus, ExternalLink, BarChart3, 
-  Copy, Trash2, Search, Filter, MoreVertical 
+  Copy, Search, Filter, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { getAllLinks, Link as LinkType } from "@/lib/db";
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { collection, query, orderBy } from "firebase/firestore";
 
 export default function Dashboard() {
-  const [links, setLinks] = useState<LinkType[]>([]);
   const [search, setSearch] = useState("");
   const { toast } = useToast();
+  const db = useFirestore();
 
-  useEffect(() => {
-    setLinks(getAllLinks());
-  }, []);
+  const linksQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, "public_urls"), orderBy("createdAt", "desc"));
+  }, [db]);
+
+  const { data: links, isLoading } = useCollection(linksQuery);
 
   const copyToClipboard = (shortCode: string) => {
     const url = `${window.location.origin}/r/${shortCode}`;
@@ -31,10 +36,10 @@ export default function Dashboard() {
     });
   };
 
-  const filteredLinks = links.filter(l => 
+  const filteredLinks = links?.filter(l => 
     l.shortCode.toLowerCase().includes(search.toLowerCase()) || 
     l.originalUrl.toLowerCase().includes(search.toLowerCase())
-  );
+  ) || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -85,7 +90,11 @@ export default function Dashboard() {
 
         {/* Links List */}
         <div className="space-y-4">
-          {filteredLinks.length > 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="w-8 h-8 text-accent animate-spin" />
+            </div>
+          ) : filteredLinks.length > 0 ? (
             filteredLinks.map((link) => (
               <Card key={link.id} className="glass-morphism border-white/5 hover:border-white/10 transition-all overflow-hidden group">
                 <CardContent className="p-0">
@@ -107,11 +116,6 @@ export default function Dashboard() {
                     </div>
 
                     <div className="flex items-center gap-8">
-                      <div className="text-center hidden sm:block">
-                        <p className="text-xl font-bold text-white">{link.totalClicks}</p>
-                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Clicks</p>
-                      </div>
-                      
                       <div className="flex items-center gap-2">
                         <Button 
                           size="icon" 
@@ -139,13 +143,6 @@ export default function Dashboard() {
                         </Button>
                       </div>
                     </div>
-                  </div>
-                  {/* Progress indicator for clicks relative to 1000 (just for visual) */}
-                  <div className="h-[2px] w-full bg-white/5">
-                    <div 
-                      className="h-full bg-accent" 
-                      style={{ width: `${Math.min((link.totalClicks / 100) * 100, 100)}%` }} 
-                    />
                   </div>
                 </CardContent>
               </Card>
