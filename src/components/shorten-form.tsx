@@ -153,13 +153,13 @@ export function ShortenForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-muted-foreground flex items-center gap-2">
-                        <Clock className="w-4 h-4" /> Expiration (Optional)
+                        <Clock className="w-4 h-4" /> Link usable till (Optional)
                       </FormLabel>
                       <FormControl>
                         <Input 
-                          type="date" 
+                          type="datetime-local" 
                           {...field} 
-                          className="bg-background/50 border-white/10 h-12 focus:ring-accent"
+                          className="bg-background/50 border-white/10 h-12 focus:ring-accent [color-scheme:dark]"
                         />
                       </FormControl>
                       <FormMessage />
