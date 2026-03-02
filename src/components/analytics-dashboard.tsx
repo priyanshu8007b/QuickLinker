@@ -35,8 +35,8 @@ export function AnalyticsDashboard({ shortCode }: { shortCode: string }) {
     return query(collection(db, "public_urls", shortCode, "clicks"), orderBy("clickedAt", "desc"));
   }, [db, shortCode]);
 
-  const { data: link, isLoading: isLinkLoading } = useDoc(linkRef);
-  const { data: clicks, isLoading: isClicksLoading } = useCollection(clicksQuery);
+  const { data: link, isLoading: isLinkLoading, error: linkError } = useDoc(linkRef);
+  const { data: clicks, isLoading: isClicksLoading, error: clicksError } = useCollection(clicksQuery);
 
   const analyticsData = useMemo(() => {
     if (!link || !clicks) return null;
@@ -52,8 +52,7 @@ export function AnalyticsDashboard({ shortCode }: { shortCode: string }) {
       .map(([date, count]) => ({ date, clicks: count }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
-    // Aggregate device types (simulated for now based on UA if we had more fields, 
-    // but we'll extract common ones from userAgent)
+    // Aggregate device types
     const deviceMap: Record<string, number> = { Mobile: 0, Desktop: 0, Tablet: 0 };
     clicks.forEach((c) => {
       const ua = c.userAgent || "";
@@ -70,7 +69,7 @@ export function AnalyticsDashboard({ shortCode }: { shortCode: string }) {
       totalClicks: clicks.length,
       dailyClicks,
       deviceTypes,
-      referrers: [] // In a real app, we'd capture document.referrer
+      referrers: []
     };
   }, [link, clicks]);
 
@@ -95,7 +94,9 @@ export function AnalyticsDashboard({ shortCode }: { shortCode: string }) {
     }
   };
 
-  if (isLinkLoading || isClicksLoading) {
+  const isActuallyLoading = isLinkLoading || isClicksLoading || (linkRef && !link && !linkError);
+
+  if (isActuallyLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <Loader2 className="w-8 h-8 text-accent animate-spin" />

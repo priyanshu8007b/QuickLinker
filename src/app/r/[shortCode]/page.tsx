@@ -39,8 +39,13 @@ export default function RedirectPage({ params }: { params: Promise<{ shortCode: 
     }
   }, [link, db, shortCode]);
 
-  // If we are loading OR the Firestore reference is still initializing, show loading state
-  if (isLoading || (!link && !error && !publicLinkRef)) {
+  // Show loading if:
+  // 1. Explicitly loading
+  // 2. We have a reference but no data/error yet (initial state before hook effect runs)
+  // 3. We are still waiting for the params or db to initialize
+  const isActuallyLoading = isLoading || (publicLinkRef && !link && !error) || !publicLinkRef;
+
+  if (isActuallyLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center space-y-4">
         <Loader2 className="w-12 h-12 text-accent animate-spin" />
@@ -51,7 +56,7 @@ export default function RedirectPage({ params }: { params: Promise<{ shortCode: 
   }
 
   // Only show "Link Not Found" if we have finished loading and the link definitively doesn't exist
-  if (error || (!isLoading && !link && publicLinkRef)) {
+  if (error || (!link && !isLoading)) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center space-y-6">
         <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center">
