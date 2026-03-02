@@ -14,8 +14,9 @@ import { moderateCustomAlias } from "@/ai/flows/alias-moderation-flow";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useFirestore } from "@/firebase";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { format, setMonth, setDate, setYear, setHours, setMinutes, getYear, getMonth, getDate, getHours, getMinutes } from "date-fns";
 import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
@@ -23,6 +24,17 @@ const formSchema = z.object({
   customAlias: z.string().optional(),
   expireAt: z.string().optional(),
 });
+
+const months = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+const days = Array.from({ length: 31 }, (_, i) => i + 1);
+const currentYear = getYear(new Date());
+const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
+const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 
 export function ShortenForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -104,6 +116,30 @@ export function ShortenForm() {
     }
   };
 
+  const handleDateChange = (type: 'month' | 'day' | 'year' | 'hour' | 'minute', value: string, currentValue: string | undefined, onChange: (val: string) => void) => {
+    let date = currentValue ? new Date(currentValue) : new Date();
+    
+    switch (type) {
+      case 'month':
+        date = setMonth(date, parseInt(value));
+        break;
+      case 'day':
+        date = setDate(date, parseInt(value));
+        break;
+      case 'year':
+        date = setYear(date, parseInt(value));
+        break;
+      case 'hour':
+        date = setHours(date, parseInt(value));
+        break;
+      case 'minute':
+        date = setMinutes(date, parseInt(value));
+        break;
+    }
+    
+    onChange(date.toISOString());
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
       <Card className="border-2">
@@ -170,43 +206,112 @@ export function ShortenForm() {
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
+                        <PopoverContent className="w-[320px] p-0" align="start">
                           <div className="p-4 space-y-4 bg-card border rounded-lg shadow-xl">
-                            <Calendar
-                              mode="single"
-                              selected={field.value ? new Date(field.value) : undefined}
-                              onSelect={(date) => {
-                                if (date) {
-                                  const current = field.value ? new Date(field.value) : new Date();
-                                  date.setHours(current.getHours());
-                                  date.setMinutes(current.getMinutes());
-                                  field.onChange(date.toISOString());
-                                }
-                              }}
-                              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                              initialFocus
-                            />
-                            <div className="flex flex-col gap-2 pt-2 border-t">
-                              <label className="text-xs font-semibold text-muted-foreground">Set Time</label>
-                              <Input 
-                                type="time"
-                                className="h-10 [color-scheme:dark]"
-                                onChange={(e) => {
-                                  const [hours, minutes] = e.target.value.split(':');
-                                  const date = field.value ? new Date(field.value) : new Date();
-                                  date.setHours(parseInt(hours));
-                                  date.setMinutes(parseInt(minutes));
-                                  field.onChange(date.toISOString());
-                                }}
-                                value={field.value ? format(new Date(field.value), "HH:mm") : ""}
-                              />
+                            <div className="space-y-3">
+                              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Select Date</label>
+                              <div className="grid grid-cols-1 gap-2">
+                                <Select 
+                                  value={field.value ? getMonth(new Date(field.value)).toString() : ""} 
+                                  onValueChange={(v) => handleDateChange('month', v, field.value, field.onChange)}
+                                >
+                                  <SelectTrigger className="h-9">
+                                    <SelectValue placeholder="Month" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {months.map((m, i) => (
+                                      <SelectItem key={m} value={i.toString()}>{m}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <Select 
+                                    value={field.value ? getDate(new Date(field.value)).toString() : ""} 
+                                    onValueChange={(v) => handleDateChange('day', v, field.value, field.onChange)}
+                                  >
+                                    <SelectTrigger className="h-9">
+                                      <SelectValue placeholder="Day" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {days.map((d) => (
+                                        <SelectItem key={d} value={d.toString()}>{d}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <Select 
+                                    value={field.value ? getYear(new Date(field.value)).toString() : ""} 
+                                    onValueChange={(v) => handleDateChange('year', v, field.value, field.onChange)}
+                                  >
+                                    <SelectTrigger className="h-9">
+                                      <SelectValue placeholder="Year" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {years.map((y) => (
+                                        <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
                             </div>
-                            <Button 
-                              className="w-full mt-2"
-                              onClick={() => setIsCalendarOpen(false)}
-                            >
-                              Done
-                            </Button>
+
+                            <Separator />
+
+                            <div className="space-y-3">
+                              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Select Time</label>
+                              <div className="flex items-center gap-2">
+                                <Select 
+                                  value={field.value ? getHours(new Date(field.value)).toString() : ""} 
+                                  onValueChange={(v) => handleDateChange('hour', v, field.value, field.onChange)}
+                                >
+                                  <SelectTrigger className="h-9 flex-1">
+                                    <SelectValue placeholder="Hour" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {hours.map((h) => (
+                                      <SelectItem key={h} value={parseInt(h).toString()}>{h}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <span className="text-muted-foreground">:</span>
+                                <Select 
+                                  value={field.value ? getMinutes(new Date(field.value)).toString() : ""} 
+                                  onValueChange={(v) => handleDateChange('minute', v, field.value, field.onChange)}
+                                >
+                                  <SelectTrigger className="h-9 flex-1">
+                                    <SelectValue placeholder="Min" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {minutes.map((m) => (
+                                      <SelectItem key={m} value={parseInt(m).toString()}>{m}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+
+                            <div className="pt-2 flex gap-2">
+                              <Button 
+                                variant="outline"
+                                className="flex-1"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  field.onChange("");
+                                  setIsCalendarOpen(false);
+                                }}
+                              >
+                                Clear
+                              </Button>
+                              <Button 
+                                className="flex-1"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setIsCalendarOpen(false);
+                                }}
+                              >
+                                Done
+                              </Button>
+                            </div>
                           </div>
                         </PopoverContent>
                       </Popover>
