@@ -22,16 +22,16 @@ function Calendar({
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4 relative",
-        month_caption: "flex flex-col items-center pt-10 relative", // Space for arrows above
+        month_caption: "flex flex-col items-center pt-12 relative", // Extra padding for the top row
         caption_label: "text-sm font-medium text-white",
-        nav: "flex items-center absolute right-0 left-0 top-0 justify-between w-full px-6 py-2 z-10",
+        nav: "flex items-center absolute right-0 left-0 top-0 justify-between w-full px-4 py-2 z-10",
         button_previous: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-100 border-accent/30 !text-accent hover:!bg-accent transition-all group"
+          "h-9 w-9 bg-transparent p-0 opacity-100 border-accent/40 !text-accent hover:!bg-accent transition-all group"
         ),
         button_next: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-100 border-accent/30 !text-accent hover:!bg-accent transition-all group"
+          "h-9 w-9 bg-transparent p-0 opacity-100 border-accent/40 !text-accent hover:!bg-accent transition-all group"
         ),
         month_grid: "w-full border-collapse space-y-1",
         weekdays: "flex",
@@ -53,10 +53,10 @@ function Calendar({
       }}
       components={{
         IconLeft: ({ className: iconClass, ...props }) => (
-          <ChevronLeft className={cn(iconClass , "h-4 w-4 text-accent group-hover:!text-black" )} {...props} />
+          <ChevronLeft className={cn(iconClass, "h-5 w-5 !text-accent group-hover:!text-black")} {...props} />
         ),
         IconRight: ({ className: iconClass, ...props }) => (
-          <ChevronRight className={cn(iconClass , "h-4 w-4 text-accent group-hover:!text-black")} {...props} />
+          <ChevronRight className={cn(iconClass, "h-5 w-5 !text-accent group-hover:!text-black")} {...props} />
         ),
       }}
       {...props}
