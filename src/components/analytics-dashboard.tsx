@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -169,7 +168,7 @@ export function AnalyticsDashboard({ shortCode }: { shortCode: string }) {
                 <Clock className="w-4 h-4 text-amber-500" />
               </div>
               <p className="text-lg font-bold text-white">
-                {new Date(analyticsData.link.expireAt).toLocaleDateString()}
+                {new Date(analyticsData.link.expireAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
               </p>
             </CardContent>
           </Card>

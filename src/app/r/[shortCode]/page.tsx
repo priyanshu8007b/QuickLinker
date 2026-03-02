@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, use, useState } from "react";
@@ -74,7 +73,7 @@ export default function RedirectPage({ params }: { params: Promise<{ shortCode: 
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-white">Link Expired</h1>
           <p className="text-muted-foreground max-w-md">
-            The link you are trying to visit was set to expire on {new Date(link!.expireAt).toLocaleDateString()}.
+            The link you are trying to visit was set to expire on {new Date(link!.expireAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}.
           </p>
         </div>
         <Button asChild className="bg-primary hover:bg-primary/90">
