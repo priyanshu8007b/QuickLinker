@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Link2, Clock, Hash, CheckCircle2, Copy, Loader2 } from "lucide-react";
+import { Link2, Clock, Hash, CheckCircle2, Copy, Loader2, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -14,6 +14,10 @@ import { useToast } from "@/hooks/use-toast";
 import { moderateCustomAlias } from "@/ai/flows/alias-moderation-flow";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useFirestore } from "@/firebase";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   url: z.string().url({ message: "Please enter a valid URL (include http/https)" }),
@@ -24,6 +28,7 @@ const formSchema = z.object({
 export function ShortenForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const { toast } = useToast();
   const db = useFirestore();
 
@@ -69,7 +74,7 @@ export function ShortenForm() {
         shortCode: shortCode,
         originalUrl: targetUrl,
         createdAt: serverTimestamp(),
-        expireAt: values.expireAt ? new Date(values.expireAt).toISOString() : null,
+        expireAt: values.expireAt || null,
         userId: null // Public link
       });
 
@@ -147,21 +152,74 @@ export function ShortenForm() {
                     </FormItem>
                   )}
                 />
+                
                 <FormField
                   control={form.control}
                   name="expireAt"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-muted-foreground flex items-center gap-2">
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="text-muted-foreground flex items-center gap-2 mb-2">
                         <Clock className="w-4 h-4" /> Link usable till (Optional)
                       </FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="datetime-local" 
-                          {...field} 
-                          className="bg-background/50 border-white/10 h-12 focus:ring-accent [color-scheme:dark]"
-                        />
-                      </FormControl>
+                      <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full h-12 bg-background/50 border-white/10 pl-3 text-left font-normal hover:bg-white/5",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(new Date(field.value), "PPP p")
+                              ) : (
+                                <span>Pick a date and time</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 glass-morphism border-white/10" align="start">
+                          <div className="p-4 space-y-4">
+                            <Calendar
+                              mode="single"
+                              selected={field.value ? new Date(field.value) : undefined}
+                              onSelect={(date) => {
+                                if (date) {
+                                  const current = field.value ? new Date(field.value) : new Date();
+                                  date.setHours(current.getHours());
+                                  date.setMinutes(current.getMinutes());
+                                  field.onChange(date.toISOString());
+                                }
+                              }}
+                              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                              initialFocus
+                            />
+                            <div className="flex flex-col gap-2 pt-2 border-t border-white/5">
+                              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Select Time</label>
+                              <Input 
+                                type="time"
+                                className="bg-white/5 border-white/10 h-10 [color-scheme:dark]"
+                                onChange={(e) => {
+                                  const [hours, minutes] = e.target.value.split(':');
+                                  const date = field.value ? new Date(field.value) : new Date();
+                                  date.setHours(parseInt(hours));
+                                  date.setMinutes(parseInt(minutes));
+                                  field.onChange(date.toISOString());
+                                }}
+                                value={field.value ? format(new Date(field.value), "HH:mm") : ""}
+                              />
+                            </div>
+                            <Button 
+                              className="w-full bg-accent text-accent-foreground hover:bg-accent/90 mt-4"
+                              onClick={() => setIsCalendarOpen(false)}
+                            >
+                              Done
+                            </Button>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
