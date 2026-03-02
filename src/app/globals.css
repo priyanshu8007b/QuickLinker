@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 222 47% 4%;
+    --background: 222 47% 2%;
     --foreground: 0 0% 100%;
-    --card: 222 47% 6%;
+    --card: 222 47% 4%;
     --card-foreground: 0 0% 100%;
-    --popover: 222 47% 4%;
+    --popover: 222 47% 2%;
     --popover-foreground: 0 0% 100%;
     --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 222 47% 10%;
+    --secondary: 222 47% 8%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 222 47% 12%;
+    --muted: 222 47% 10%;
     --muted-foreground: 215 20.2% 65.1%;
     --accent: 191 100% 50%;
     --accent-foreground: 222 47% 4%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 217 32.6% 17.5%;
-    --input: 217 32.6% 17.5%;
+    --border: 217 32.6% 12%;
+    --input: 217 32.6% 12%;
     --ring: 191 100% 50%;
-    --radius: 1rem;
+    --radius: 0.75rem;
     --chart-1: 191 100% 50%;
     --chart-2: 217 91% 60%;
     --chart-3: 197 37% 24%;
@@ -39,34 +39,34 @@
   body {
     @apply bg-background text-foreground font-body antialiased;
     background-image: 
-      radial-gradient(at 0% 0%, hsla(217, 91%, 60%, 0.05) 0, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(191, 100% 50%, 0.05) 0, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(217, 91%, 60%, 0.03) 0, transparent 40%),
+      radial-gradient(at 100% 100%, hsla(191, 100% 50%, 0.03) 0, transparent 40%);
     background-attachment: fixed;
   }
 }
 
 .glass-morphism {
-  @apply bg-card/40 backdrop-blur-xl border border-white/5;
+  @apply bg-card/30 backdrop-blur-md border border-white/[0.03];
 }
 
 .glass-morphism-heavy {
-  @apply bg-card/80 backdrop-blur-2xl border border-white/10;
+  @apply bg-card/60 backdrop-blur-xl border border-white/[0.08];
 }
 
-.glow-accent {
-  box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
+.glow-subtle {
+  box-shadow: 0 0 40px rgba(0, 212, 255, 0.05);
 }
 
-.text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-white/50;
+.text-gradient-subtle {
+  @apply bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70;
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
+@keyframes float-subtle {
   0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-5px); }
   100% { transform: translateY(0px); }
+}
+
+.animate-float-subtle {
+  animation: float-subtle 8s ease-in-out infinite;
 }

@@ -30,8 +30,8 @@ export default function Dashboard() {
     const url = `${window.location.origin}/r/${shortCode}`;
     navigator.clipboard.writeText(url);
     toast({
-      title: "COPIED TO CLIPS",
-      description: "Short link ready for sharing.",
+      title: "Copied",
+      description: "Link copied to clipboard.",
     });
   };
 
@@ -45,100 +45,100 @@ export default function Dashboard() {
       {/* Navigation */}
       <header className="glass-morphism border-b border-white/5 px-8 py-4 flex items-center justify-between sticky top-0 z-50">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-            <Zap className="w-5 h-5 text-accent fill-accent" />
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <Zap className="w-4 h-4 text-accent fill-accent" />
           </div>
-          <span className="text-xl font-black tracking-tighter text-white uppercase">QuickLinker</span>
+          <span className="text-lg font-bold tracking-tight text-white uppercase">QuickLinker</span>
         </Link>
         <div className="flex items-center gap-6">
-          <Link href="/" className="text-xs font-bold text-muted-foreground hover:text-white uppercase tracking-widest transition-colors">Home</Link>
-          <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-[10px] font-black text-accent shadow-glow shadow-accent/5">
+          <Link href="/" className="text-[10px] font-bold text-muted-foreground hover:text-white uppercase tracking-widest transition-colors">Home</Link>
+          <div className="w-7 h-7 rounded-full bg-accent/5 border border-accent/20 flex items-center justify-center text-[9px] font-bold text-accent">
             JD
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-8 py-16 space-y-12">
+      <main className="max-w-6xl mx-auto px-8 py-12 space-y-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-2">
-            <h1 className="text-5xl font-black tracking-tighter text-white uppercase">Dashboard</h1>
-            <p className="text-muted-foreground font-medium">Real-time status of your redirection infrastructure.</p>
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
+            <p className="text-sm text-muted-foreground font-medium opacity-70">Manage your active redirects and performance.</p>
           </div>
-          <Button className="bg-primary hover:bg-primary/90 text-white font-bold h-12 px-8 rounded-full shadow-lg shadow-primary/20" asChild>
-            <Link href="/"><Plus className="w-5 h-5 mr-2" /> CREATE NEW LINK</Link>
+          <Button className="bg-primary hover:opacity-90 text-white font-bold h-10 px-6 rounded-lg text-xs" asChild>
+            <Link href="/"><Plus className="w-4 h-4 mr-2" /> New Link</Link>
           </Button>
         </div>
 
         {/* Filters and Search */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground opacity-50" />
             <Input 
-              placeholder="SEARCH BY ALIAS OR TARGET URL..." 
-              className="pl-12 bg-white/5 border-white/10 h-14 rounded-2xl focus:ring-accent font-bold text-sm tracking-tight placeholder:text-muted-foreground/30"
+              placeholder="Filter links..." 
+              className="pl-10 bg-white/[0.03] border-white/5 h-12 rounded-xl focus:ring-accent font-medium text-sm placeholder:text-muted-foreground/30"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <Button variant="outline" className="border-white/10 h-14 px-6 rounded-2xl bg-white/5 font-bold text-xs tracking-widest uppercase">
-            <Filter className="w-4 h-4 mr-2" /> Filter
+          <Button variant="outline" className="border-white/5 h-12 px-5 rounded-xl bg-white/[0.03] font-bold text-[10px] tracking-widest uppercase">
+            <Filter className="w-3.5 h-3.5 mr-2" /> Sort
           </Button>
         </div>
 
         {/* Links List */}
         <div className="grid grid-cols-1 gap-4">
           {isLoading ? (
-            <div className="flex justify-center py-32">
-              <Loader2 className="w-12 h-12 text-accent animate-spin" />
+            <div className="flex justify-center py-24">
+              <Loader2 className="w-10 h-10 text-accent/40 animate-spin" />
             </div>
           ) : filteredLinks.length > 0 ? (
             filteredLinks.map((link) => (
-              <Card key={link.id} className="glass-morphism border-white/5 hover:border-accent/20 transition-all duration-300 overflow-hidden group rounded-3xl">
+              <Card key={link.id} className="glass-morphism border-white/[0.03] hover:border-white/10 transition-all duration-300 rounded-2xl">
                 <CardContent className="p-0">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between p-8 gap-8">
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="flex items-center gap-4">
-                        <Link href={`/analytics/${link.shortCode}`} className="text-3xl font-black text-white hover:text-accent transition-colors tracking-tighter uppercase">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between p-6 gap-6">
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <div className="flex items-center gap-3">
+                        <Link href={`/analytics/${link.shortCode}`} className="text-xl font-bold text-white hover:text-accent transition-colors tracking-tight">
                           /{link.shortCode}
                         </Link>
                         {link.expireAt && (
-                          <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.15em] border-amber-500/30 text-amber-500 bg-amber-500/5 px-3 py-1 rounded-full">
-                            <Clock className="w-3 h-3 mr-1.5 inline" /> Exp: {new Date(link.expireAt).toLocaleDateString()}
+                          <Badge variant="outline" className="text-[8px] font-bold uppercase tracking-widest border-amber-500/20 text-amber-500 bg-amber-500/5 px-2 py-0.5 rounded-md">
+                            <Clock className="w-2.5 h-2.5 mr-1 inline" /> {new Date(link.expireAt).toLocaleDateString()}
                           </Badge>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                      <div className="flex items-center gap-1.5 text-muted-foreground opacity-60">
                         <ArrowUpRight className="w-3 h-3" />
-                        <p className="text-sm truncate max-w-xl hover:text-white transition-colors cursor-default">
+                        <p className="text-xs truncate max-w-lg font-medium">
                           {link.originalUrl}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <Button 
-                        size="lg" 
+                        size="sm" 
                         variant="ghost" 
-                        className="rounded-2xl h-12 w-12 text-muted-foreground hover:text-white bg-white/5 hover:bg-white/10 transition-all"
+                        className="rounded-lg h-9 w-9 text-muted-foreground hover:text-white bg-white/[0.03] hover:bg-white/[0.08]"
                         onClick={() => copyToClipboard(link.shortCode)}
                       >
-                        <Copy className="w-5 h-5" />
+                        <Copy className="w-4 h-4" />
                       </Button>
                       <Button 
-                        size="lg" 
+                        size="sm" 
                         variant="ghost" 
-                        className="rounded-2xl h-12 w-12 text-muted-foreground hover:text-accent bg-white/5 hover:bg-white/10 transition-all"
+                        className="rounded-lg h-9 w-9 text-muted-foreground hover:text-accent bg-white/[0.03] hover:bg-white/[0.08]"
                         asChild
                       >
-                        <Link href={`/analytics/${link.shortCode}`}><BarChart3 className="w-5 h-5" /></Link>
+                        <Link href={`/analytics/${link.shortCode}`}><BarChart3 className="w-4 h-4" /></Link>
                       </Button>
                       <Button 
-                        size="lg" 
+                        size="sm" 
                         variant="ghost" 
-                        className="rounded-2xl h-12 w-12 text-muted-foreground hover:text-white bg-white/5 hover:bg-white/10 transition-all"
+                        className="rounded-lg h-9 w-9 text-muted-foreground hover:text-white bg-white/[0.03] hover:bg-white/[0.08]"
                         asChild
                       >
-                        <a href={link.originalUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-5 h-5" /></a>
+                        <a href={link.originalUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-4 h-4" /></a>
                       </Button>
                     </div>
                   </div>
@@ -146,15 +146,15 @@ export default function Dashboard() {
               </Card>
             ))
           ) : (
-            <div className="text-center py-32 glass-morphism rounded-[3rem] border-dashed border-white/10 flex flex-col items-center gap-6">
-              <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center mb-2">
-                <Zap className="w-10 h-10 text-muted-foreground/30" />
+            <div className="text-center py-24 glass-morphism rounded-3xl border-dashed border-white/5 flex flex-col items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-white/[0.02] flex items-center justify-center">
+                <Zap className="w-8 h-8 text-muted-foreground/20" />
               </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl font-black text-white uppercase tracking-tight">No Active Links</h3>
-                <p className="text-muted-foreground font-medium">You haven't generated any performance links yet.</p>
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-white opacity-80">No links found</h3>
+                <p className="text-xs text-muted-foreground opacity-60">Start by creating your first performance redirect.</p>
               </div>
-              <Button className="mt-4 bg-primary rounded-full px-10 h-12 font-bold" asChild><Link href="/">GET STARTED</Link></Button>
+              <Button className="mt-2 bg-primary text-xs rounded-lg px-6 h-9 font-bold" asChild><Link href="/">Get Started</Link></Button>
             </div>
           )}
         </div>
