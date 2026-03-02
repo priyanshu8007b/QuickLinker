@@ -18,20 +18,20 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={cn("p-3 bg-background border rounded-md", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4 relative",
-        month_caption: "flex flex-col items-center pt-12 relative", // Padding at top for the absolute nav
-        caption_label: "text-sm font-medium text-white",
-        nav: "flex items-center absolute right-0 left-0 top-0 justify-between w-full px-4 py-2 z-20",
+        month_caption: "flex flex-col items-center pt-12 pb-2 relative", // Padding top to make room for nav
+        caption_label: "text-sm font-semibold text-white tracking-tight",
+        nav: "flex items-center absolute right-0 left-0 top-1 justify-between w-full px-4 z-20", // Positioned at top
         button_previous: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-9 w-9 bg-transparent p-0 opacity-100 border-accent/40 !text-accent hover:!bg-accent hover:!text-black transition-all group"
+          buttonVariants({ variant: "ghost" }),
+          "h-8 w-8 p-0 opacity-100 !text-accent hover:!bg-accent hover:!text-black transition-colors rounded-full"
         ),
         button_next: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-9 w-9 bg-transparent p-0 opacity-100 border-accent/40 !text-accent hover:!bg-accent hover:!text-black transition-all group"
+          buttonVariants({ variant: "ghost" }),
+          "h-8 w-8 p-0 opacity-100 !text-accent hover:!bg-accent hover:!text-black transition-colors rounded-full"
         ),
         month_grid: "w-full border-collapse space-y-1",
         weekdays: "flex",
@@ -39,24 +39,24 @@ function Calendar({
         week: "flex w-full mt-2",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-black"
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-black rounded-md"
         ),
         day_button: "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
         range_end: "day-range-end",
-        selected: "bg-primary text-background hover:bg-primary hover:text-background focus:bg-primary focus:text-background",
-        today: "bg-accent/20 text-accent font-bold",
-        outside: "day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
+        selected: "!bg-primary !text-white hover:!bg-primary/90 focus:!bg-primary focus:!text-white",
+        today: "text-accent font-bold underline underline-offset-4",
+        outside: "day-outside text-muted-foreground/50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
         disabled: "text-muted-foreground opacity-50",
         range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
         hidden: "invisible",
         ...classNames,
       }}
       components={{
-        IconLeft: ({ className: iconClass, ...props }) => (
-          <ChevronLeft className={cn(iconClass, "h-5 w-5 !text-inherit")} {...props} />
+        IconLeft: ({ ...props }) => (
+          <ChevronLeft className="h-5 w-5 !text-inherit" {...props} />
         ),
-        IconRight: ({ className: iconClass, ...props }) => (
-          <ChevronRight className={cn(iconClass, "h-5 w-5 !text-inherit")} {...props} />
+        IconRight: ({ ...props }) => (
+          <ChevronRight className="h-5 w-5 !text-inherit" {...props} />
         ),
       }}
       {...props}
