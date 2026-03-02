@@ -1,40 +1,40 @@
 
 "use client";
 
-import { useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, use } from "react";
+import { useRouter } from "next/navigation";
 import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export default function RedirectPage() {
-  const { shortCode } = useParams();
+export default function RedirectPage({ params }: { params: Promise<{ shortCode: string }> }) {
+  const { shortCode } = use(params);
   const router = useRouter();
   const db = useFirestore();
 
-  // We look in both public and user collections, but for simplicity we'll check public first
   const publicLinkRef = useMemoFirebase(() => {
     if (!db || !shortCode) return null;
-    return doc(db, "public_urls", shortCode as string);
+    return doc(db, "public_urls", shortCode);
   }, [db, shortCode]);
 
   const { data: link, isLoading, error } = useDoc(publicLinkRef);
 
   useEffect(() => {
-    if (link && link.originalUrl) {
+    if (link && link.originalUrl && db && shortCode) {
       // Record click (non-blocking)
-      const clicksRef = collection(db, "public_urls", shortCode as string, "clicks");
+      const clicksRef = collection(db, "public_urls", shortCode, "clicks");
       addDoc(clicksRef, {
         urlId: shortCode,
         clickedAt: serverTimestamp(),
         userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown',
         ipHash: 'anonymous',
-      });
+      }).catch(err => console.error("Failed to record click", err));
 
-      // Redirect
-      window.location.href = link.originalUrl;
+      // Perform the redirect
+      // Using window.location.replace for a cleaner redirect that doesn't keep the /r/ page in history
+      window.location.replace(link.originalUrl);
     }
   }, [link, db, shortCode]);
 
