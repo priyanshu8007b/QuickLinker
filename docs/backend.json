@@ -1,0 +1,218 @@
+{
+  "entities": {
+    "Url": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Url",
+      "type": "object",
+      "description": "Represents a shortened URL and its associated metadata, including the original URL, short code, and expiration details.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Url entity."
+        },
+        "shortCode": {
+          "type": "string",
+          "description": "The unique, short code generated for the original URL. This code is used in the short URL (e.g., domain.com/abc123)."
+        },
+        "originalUrl": {
+          "type": "string",
+          "description": "The original, long URL that this short code redirects to. It is canonicalized before storage to ensure consistency.",
+          "format": "uri"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The timestamp when the short URL was created.",
+          "format": "date-time"
+        },
+        "expireAt": {
+          "type": "string",
+          "description": "An optional timestamp indicating when the short URL will expire and become inactive, returning a 404.",
+          "format": "date-time"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Optional reference to the UserProfile who created this short URL. (Relationship: UserProfile 1:N Url)"
+        }
+      },
+      "required": [
+        "id",
+        "shortCode",
+        "originalUrl",
+        "createdAt"
+      ]
+    },
+    "Click": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Click",
+      "type": "object",
+      "description": "Represents a single click event on a short URL, storing anonymized data for analytics and reporting.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Click entity."
+        },
+        "urlId": {
+          "type": "string",
+          "description": "Reference to the Url entity that was clicked, linking the click event to a specific short URL. (Relationship: Url 1:N Click)"
+        },
+        "clickedAt": {
+          "type": "string",
+          "description": "The precise timestamp when the click occurred.",
+          "format": "date-time"
+        },
+        "ipHash": {
+          "type": "string",
+          "description": "An anonymized (hashed or truncated) representation of the IP address from which the click originated, ensuring user privacy."
+        },
+        "userAgent": {
+          "type": "string",
+          "description": "Optional information about the user agent (e.g., browser type, operating system) that initiated the click."
+        }
+      },
+      "required": [
+        "id",
+        "urlId",
+        "clickedAt",
+        "ipHash"
+      ]
+    },
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user of the URL shortening service. This entity holds basic user identification, with full authentication handled by an external system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity. This ID serves as a reference to an external authentication system and is not sensitive user data."
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/user_profiles/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores basic user profile information. The `userId` in the path directly corresponds to `request.auth.uid`, establishing clear ownership for security rules. This collection is for internal user management data and does not store sensitive authentication details, which are handled externally.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user profile, matching the authenticated user's UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/urls/{shortCode}",
+        "definition": {
+          "entityName": "Url",
+          "schema": {
+            "$ref": "#/backend/entities/Url"
+          },
+          "description": "Dedicated collection for URLs created and owned by a specific authenticated user. The `userId` in the path ensures path-based ownership, enabling straightforward authorization rules. The `shortCode` serves as the document ID for direct access, and the document includes an 'id' field which can mirror the shortCode or serve as an internal ID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this URL, matching the authenticated user's UID."
+            },
+            {
+              "name": "shortCode",
+              "description": "The unique short code for the URL, used as the document ID for efficient lookups."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/public_urls/{shortCode}",
+        "definition": {
+          "entityName": "Url",
+          "schema": {
+            "$ref": "#/backend/entities/Url"
+          },
+          "description": "Collection for URLs created anonymously or explicitly designated as public/unowned. Access can be granted widely (e.g., read by anyone), while write operations are typically restricted to backend services or administrators. The `shortCode` serves as the document ID for efficient lookups, and the document includes an 'id' field which can mirror the shortCode or serve as an internal ID.",
+          "params": [
+            {
+              "name": "shortCode",
+              "description": "The unique short code for the URL, used as the document ID for efficient lookups."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/urls/{shortCode}/clicks/{clickId}",
+        "definition": {
+          "entityName": "Click",
+          "schema": {
+            "$ref": "#/backend/entities/Click"
+          },
+          "description": "Records individual click events for user-owned URLs. The `userId` and `shortCode` are inherited from the parent path, making authorization for analytics data direct and independent (no `get()` calls needed). The document includes denormalized `urlId` (referencing the parent `shortCode`) for data integrity and direct queryability.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns the parent URL."
+            },
+            {
+              "name": "shortCode",
+              "description": "The unique short code of the parent URL."
+            },
+            {
+              "name": "clickId",
+              "description": "The unique identifier for a specific click event."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/public_urls/{shortCode}/clicks/{clickId}",
+        "definition": {
+          "entityName": "Click",
+          "schema": {
+            "$ref": "#/backend/entities/Click"
+          },
+          "description": "Records individual click events for public/anonymous URLs. Access to this data typically mirrors the parent public URL's access policy (e.g., publicly readable for analytics display, or restricted to administrators). The document includes denormalized `urlId` (referencing the parent `shortCode`) for data integrity and direct queryability.",
+          "params": [
+            {
+              "name": "shortCode",
+              "description": "The unique short code of the parent public URL."
+            },
+            {
+              "name": "clickId",
+              "description": "The unique identifier for a specific click event."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{adminId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "A collection used for Database Access Control (DBAC) to designate administrators. The existence of a document with `adminId` matching `request.auth.uid` grants administrative privileges. This avoids custom claims and uses an 'existence over content' approach for roles.",
+          "params": [
+            {
+              "name": "adminId",
+              "description": "The unique identifier of a user designated as an administrator, matching their authenticated UID."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure for QuickLinker is designed to achieve optimal security, scalability, and debuggability by strictly adhering to the core design principles, especially Authorization Independence and Structural Segregation.\n\n**Authorization Independence (CRITICAL):**\nThis design completely eliminates the need for `get()` calls in security rules, which is crucial for robust and performant authorization. This is achieved through two primary mechanisms:\n1.  **Path-Based Ownership:** For user-owned data, such as `Urls` created by authenticated users and their corresponding `Clicks`, the `userId` is always present in the Firestore path (`/users/{userId}/urls/{shortCode}`). This allows security rules to directly compare `request.auth.uid` with the `userId` in the path, making authorization atomic and highly efficient. The ownership is explicit in the data's location.\n2.  **Structural Segregation for Authorization Context:** Public or anonymous data is separated into distinct top-level collections (e.g., `/public_urls/{shortCode}`). This means documents within these collections inherently carry their authorization context (e.g., 'publicly readable') without needing to inspect parent documents or fields. Any associated subcollections, like `Clicks` under `/public_urls/{shortCode}/clicks/{clickId}`, also inherit this context directly from their path.\n\n**Queryable Authorization Patterns (QAPs) and List Operations:**\nThe structure explicitly supports secure and efficient `list` operations, ensuring that security rules are not used as data filters:\n1.  **User-Owned URLs:** A user can query and list only their own URLs by issuing a query against `/users/{request.auth.uid}/urls`. The security rules for this path will simply check if `request.auth.uid` matches the `{userId}` wildcard, allowing a direct, authorized list of owned resources.\n2.  **User-Owned URL Clicks:** Similarly, a user can list the clicks for any of their specific URLs by querying `/users/{request.auth.uid}/urls/{shortCode}/clicks`. This provides a secure and efficient way to retrieve analytics data tied to their owned short links.\n3.  **Public URLs and Clicks:** Public URLs and their associated click data are placed in dedicated collections (`/public_urls/{shortCode}` and `/public_urls/{shortCode}/clicks/{clickId}`). If these are intended to be publicly readable (e.g., for general analytics dashboards without user authentication), security rules can simply `allow read: true;`. If they are meant for admin-only access, this structure still allows for simple rules by checking admin roles without filtering.\n4.  **DBAC for Admin Roles:** Global administrator roles are implemented using an existence check in `/roles_admin/{adminId}`. An administrator can be granted access to all `public_urls` and `users/{userId}/urls` by checking `request.auth.uid` against documents in this collection, without impacting the QAPs for regular users.\n\nThis design ensures that authorization logic remains simple, explicit, and confined to the security rules themselves, minimizing complexity and maximizing performance by leveraging Firestore's hierarchical nature for authorization."
+  }
+}

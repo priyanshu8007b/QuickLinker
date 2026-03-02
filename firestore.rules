@@ -1,0 +1,141 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * QUICKLINKER SECURITY RULES
+     *
+     * Core Philosophy:
+     * This ruleset implements a dual-access model: strict path-based ownership for private 
+     * user data and a public-access model for anonymous short links. It prioritizes 
+     * Authorization Independence by using the Firestore path structure to determine 
+     * access rights, eliminating the need for expensive cross-document lookups (get() calls) 
+     * for standard user operations.
+     *
+     * Data Structure:
+     * - /user_profiles/{userId}: Private user metadata linked to Auth UID.
+     * - /users/{userId}/urls/{shortCode}: Private links owned by a specific user.
+     * - /public_urls/{shortCode}: Publicly accessible links (anonymous or shared).
+     * - /roles_admin/{adminId}: A system-level collection where the existence of a 
+     *   document grants administrative override capabilities.
+     *
+     * Key Security Decisions:
+     * 1. Path-Based Ownership: Security for user-owned URLs is enforced by comparing 
+     *    the {userId} wildcard in the path directly against request.auth.uid.
+     * 2. Administrative Override: An isAdmin() helper allows designated users to 
+     *    manage all collections for moderation and maintenance.
+     * 3. Immutability: Relational fields (like shortCode or userId) are enforced as 
+     *    immutable on update to prevent data corruption or ownership hijacking.
+     * 4. Public Analytics: Click data for public URLs is readable by anyone to support 
+     *    open analytics dashboards, while click data for private URLs remains private.
+     *
+     * Denormalization for Authorization:
+     * Ownership fields (userId and shortCode) are validated within document bodies 
+     * on creation to ensure the internal data matches the secure path.
+     */
+
+    // --- Helper Functions ---
+
+    /** @description Checks if the user is authenticated. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** @description Checks if the user's UID matches the provided ID. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** @description Checks if the user has an entry in the admin roles collection. */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /** @description Combines ownership check with existence check for updates and deletes. */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for global administrative role definitions.
+     * @path /roles_admin/{adminId}
+     * @allow get: (read) if the user is checking their own admin status.
+     * @deny write: (create, update, delete) restricted to system-level management (GCP Console).
+     * @principle DBAC (Database Access Control) for administrative privileges.
+     */
+    match /roles_admin/{adminId} {
+      allow get: if isOwner(adminId);
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Private user profile data.
+     * @path /user_profiles/{userId}
+     * @allow create: (write) if the UID matches the document ID.
+     * @deny update: (write) if trying to change the document ID/link.
+     * @principle Path-based ownership for user management.
+     */
+    match /user_profiles/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description User-owned shortened URLs.
+     * @path /users/{userId}/urls/{shortCode}
+     * @allow list: (read) if the user is the owner of the path.
+     * @deny create: (write) if the internal userId field doesn't match the path.
+     * @principle Authorization Independence via path-based ownership.
+     */
+    match /users/{userId}/urls/{shortCode} {
+      allow get, list: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == userId && request.resource.data.shortCode == shortCode;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId && request.resource.data.shortCode == resource.data.shortCode;
+      allow delete: if isExistingOwner(userId) || isAdmin();
+
+      /**
+       * @description Clicks associated with a user's private URL.
+       * @path /users/{userId}/urls/{shortCode}/clicks/{clickId}
+       * @allow create: (write) by anyone (to record a click event).
+       * @deny update: (write) clicks are immutable event logs.
+       */
+      match /clicks/{clickId} {
+        allow get, list: if isOwner(userId) || isAdmin();
+        allow create: if request.resource.data.urlId == shortCode;
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    /**
+     * @description Publicly accessible shortened URLs.
+     * @path /public_urls/{shortCode}
+     * @allow get, list: (read) for all users (publicly readable).
+     * @deny delete: (write) restricted to administrators.
+     * @principle Structural segregation of public vs. private assets.
+     */
+    match /public_urls/{shortCode} {
+      allow get, list: if true;
+      allow create: if request.resource.data.shortCode == shortCode;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+
+      /**
+       * @description Clicks associated with a public URL.
+       * @path /public_urls/{shortCode}/clicks/{clickId}
+       * @allow list: (read) public analytics access.
+       * @principle Publicly readable analytics for public resources.
+       */
+      match /clicks/{clickId} {
+        allow get, list: if true;
+        allow create: if request.resource.data.urlId == shortCode;
+        allow update, delete: if isAdmin();
+      }
+    }
+  }
+}
