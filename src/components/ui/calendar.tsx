@@ -21,17 +21,17 @@ function Calendar({
       className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4",
-        month_caption: "flex justify-center pt-1 relative items-center",
+        month: "space-y-4 relative",
+        month_caption: "flex flex-col items-center pt-10 relative", // Added padding top to make room for arrows above
         caption_label: "text-sm font-medium text-white",
-        nav: "flex items-center absolute right-1 left-1 top-0 justify-between w-full px-2",
+        nav: "flex items-center absolute right-0 left-0 top-0 justify-between w-full px-6 py-2 z-10",
         button_previous: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-100 border-accent/30 !text-white hover:!bg-accent hover:!text-black transition-colors group"
+          "h-7 w-7 bg-transparent p-0 opacity-100 border-accent/30 !text-white hover:!bg-accent hover:!text-black transition-all group"
         ),
         button_next: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-100 border-accent/30 !text-white hover:!bg-accent hover:!text-black transition-colors group"
+          "h-7 w-7 bg-transparent p-0 opacity-100 border-accent/30 !text-white hover:!bg-accent hover:!text-black transition-all group"
         ),
         month_grid: "w-full border-collapse space-y-1",
         weekdays: "flex",
@@ -53,10 +53,10 @@ function Calendar({
       }}
       components={{
         IconLeft: ({ className: iconClass, ...props }) => (
-          <ChevronLeft className={cn("h-4 w-4 !text-inherit", iconClass)} {...props} />
+          <ChevronLeft className={cn("h-4 w-4 !text-white group-hover:!text-black", iconClass)} {...props} />
         ),
         IconRight: ({ className: iconClass, ...props }) => (
-          <ChevronRight className={cn("h-4 w-4 !text-inherit", iconClass)} {...props} />
+          <ChevronRight className={cn("h-4 w-4 !text-white group-hover:!text-black", iconClass)} {...props} />
         ),
       }}
       {...props}
