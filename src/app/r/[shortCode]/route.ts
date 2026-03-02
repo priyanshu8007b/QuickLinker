@@ -3,9 +3,9 @@ import { getLinkByCode, recordClick } from "@/lib/db";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { shortCode: string } }
+  { params }: { params: Promise<{ shortCode: string }> }
 ) {
-  const { shortCode } = params;
+  const { shortCode } = await params;
   
   // Simulated Cache Check (In real app, use Redis)
   const link = getLinkByCode(shortCode);

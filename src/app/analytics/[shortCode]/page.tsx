@@ -2,7 +2,9 @@ import Link from "next/link";
 import { ChevronLeft, Zap } from "lucide-react";
 import { AnalyticsDashboard } from "@/components/analytics-dashboard";
 
-export default function AnalyticsPage({ params }: { params: { shortCode: string } }) {
+export default async function AnalyticsPage({ params }: { params: Promise<{ shortCode: string }> }) {
+  const { shortCode } = await params;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Mini Nav */}
@@ -20,7 +22,7 @@ export default function AnalyticsPage({ params }: { params: { shortCode: string 
       </header>
 
       <main className="flex-1">
-        <AnalyticsDashboard shortCode={params.shortCode} />
+        <AnalyticsDashboard shortCode={shortCode} />
       </main>
     </div>
   );
