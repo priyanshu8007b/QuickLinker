@@ -105,46 +105,38 @@ export function ShortenForm() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-8">
-      <Card className="glass-morphism-heavy rounded-2xl border-white/[0.05] glow-subtle p-2">
+    <div className="w-full max-w-2xl mx-auto space-y-6">
+      <Card className="border-2">
         <CardContent className="p-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="url"
                 render={({ field }) => (
-                  <FormItem className="space-y-2">
-                    <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 opacity-60">
-                      <Link2 className="w-3.5 h-3.5 text-accent" /> Destination URL
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <Link2 className="w-4 h-4 text-primary" /> Destination URL
                     </FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="https://example.com/long-url" 
-                        {...field} 
-                        className="bg-white/[0.03] border-white/5 h-12 rounded-xl focus:ring-accent font-medium text-sm placeholder:text-muted-foreground/30"
-                      />
+                      <Input placeholder="https://example.com/very-long-url" {...field} className="h-12" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="customAlias"
                   render={({ field }) => (
-                    <FormItem className="space-y-2">
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 opacity-60">
-                        <Hash className="w-3.5 h-3.5 text-accent" /> Alias (Optional)
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Hash className="w-4 h-4 text-primary" /> Alias (Optional)
                       </FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="my-link" 
-                          {...field} 
-                          className="bg-white/[0.03] border-white/5 h-12 rounded-xl focus:ring-accent font-medium text-sm"
-                        />
+                        <Input placeholder="my-custom-link" {...field} className="h-12" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -155,9 +147,9 @@ export function ShortenForm() {
                   control={form.control}
                   name="expireAt"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col space-y-2">
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 opacity-60">
-                        <Clock className="w-3.5 h-3.5 text-accent" /> Expiration
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="flex items-center gap-2 mb-1">
+                        <Clock className="w-4 h-4 text-primary" /> Link usable till
                       </FormLabel>
                       <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                         <PopoverTrigger asChild>
@@ -165,8 +157,8 @@ export function ShortenForm() {
                             <Button
                               variant={"outline"}
                               className={cn(
-                                "w-full h-12 bg-white/[0.03] border-white/5 rounded-xl px-4 text-left font-medium text-sm hover:bg-white/[0.05] transition-all",
-                                !field.value && "text-muted-foreground/30"
+                                "w-full h-12 pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
                               )}
                             >
                               {field.value ? (
@@ -174,12 +166,12 @@ export function ShortenForm() {
                               ) : (
                                 <span>No Expiration</span>
                               )}
-                              <CalendarIcon className="ml-auto h-3.5 w-3.5 opacity-40" />
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 glass-morphism-heavy border-white/10 rounded-2xl mt-2 shadow-2xl" align="start">
-                          <div className="p-4 space-y-4">
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <div className="p-4 space-y-4 bg-card border rounded-lg shadow-xl">
                             <Calendar
                               mode="single"
                               selected={field.value ? new Date(field.value) : undefined}
@@ -193,13 +185,12 @@ export function ShortenForm() {
                               }}
                               disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                               initialFocus
-                              className="rounded-xl"
                             />
-                            <div className="flex flex-col gap-2 pt-3 border-t border-white/5">
-                              <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground opacity-60">Set Time</label>
+                            <div className="flex flex-col gap-2 pt-2 border-t">
+                              <label className="text-xs font-semibold text-muted-foreground">Set Time</label>
                               <Input 
                                 type="time"
-                                className="bg-white/5 border-white/5 h-10 rounded-lg [color-scheme:dark] font-bold text-xs"
+                                className="h-10 [color-scheme:dark]"
                                 onChange={(e) => {
                                   const [hours, minutes] = e.target.value.split(':');
                                   const date = field.value ? new Date(field.value) : new Date();
@@ -211,10 +202,10 @@ export function ShortenForm() {
                               />
                             </div>
                             <Button 
-                              className="w-full bg-primary text-primary-foreground font-bold text-xs h-10 rounded-lg hover:opacity-90 transition-opacity"
+                              className="w-full mt-2"
                               onClick={() => setIsCalendarOpen(false)}
                             >
-                              Confirm
+                              Done
                             </Button>
                           </div>
                         </PopoverContent>
@@ -225,18 +216,14 @@ export function ShortenForm() {
                 />
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full h-14 bg-primary hover:opacity-90 text-white font-bold text-sm tracking-tight rounded-xl transition-all shadow-lg shadow-primary/10"
-                disabled={isLoading}
-              >
+              <Button type="submit" className="w-full h-12 text-lg font-semibold" disabled={isLoading}>
                 {isLoading ? (
                   <span className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" /> Shortening...
+                    <Loader2 className="w-5 h-5 animate-spin" /> Shortening...
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    Generate Link <ArrowRight className="w-4 h-4" />
+                    Shorten Link <ArrowRight className="w-5 h-5" />
                   </span>
                 )}
               </Button>
@@ -246,30 +233,20 @@ export function ShortenForm() {
       </Card>
 
       {result && (
-        <div className="animate-fade-in">
-          <Card className="glass-morphism rounded-2xl border-accent/20 overflow-hidden shadow-xl p-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                  <CheckCircle2 className="w-5 h-5 text-accent" />
-                </div>
-                <div>
-                  <p className="text-[9px] text-accent font-bold uppercase tracking-widest mb-0.5 opacity-80">Link Active</p>
-                  <p className="text-lg font-bold text-white tracking-tight truncate max-w-[200px] md:max-w-md">
-                    {result.replace('https://', '').replace('http://', '')}
-                  </p>
-                </div>
+        <Card className="border-primary/50 bg-primary/5">
+          <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="w-6 h-6 text-primary" />
+              <div>
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Success! Link Ready:</p>
+                <p className="text-xl font-bold truncate max-w-[200px] md:max-w-md">{result}</p>
               </div>
-              <Button 
-                onClick={copyToClipboard} 
-                variant="secondary" 
-                className="gap-2 h-11 px-6 rounded-lg bg-white text-black font-bold text-xs hover:bg-white/90 transition-all"
-              >
-                <Copy className="w-3.5 h-3.5" /> Copy Link
-              </Button>
             </div>
-          </Card>
-        </div>
+            <Button onClick={copyToClipboard} variant="secondary" className="gap-2">
+              <Copy className="w-4 h-4" /> Copy Link
+            </Button>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
