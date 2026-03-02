@@ -30,15 +30,17 @@ export default function RedirectPage({ params }: { params: Promise<{ shortCode: 
         clickedAt: serverTimestamp(),
         userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown',
         ipHash: 'anonymous',
-      }).catch(err => console.error("Failed to record click", err));
+      }).catch(err => {
+        // Silently fail click recording to prioritize redirection speed
+      });
 
-      // Perform the redirect
-      // Using window.location.replace for a cleaner redirect that doesn't keep the /r/ page in history
+      // Perform the redirect using location.replace to keep browser history clean
       window.location.replace(link.originalUrl);
     }
   }, [link, db, shortCode]);
 
-  if (isLoading) {
+  // If we are loading OR the Firestore reference is still initializing, show loading state
+  if (isLoading || (!link && !error && !publicLinkRef)) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center space-y-4">
         <Loader2 className="w-12 h-12 text-accent animate-spin" />
@@ -48,7 +50,8 @@ export default function RedirectPage({ params }: { params: Promise<{ shortCode: 
     );
   }
 
-  if (error || (!isLoading && !link)) {
+  // Only show "Link Not Found" if we have finished loading and the link definitively doesn't exist
+  if (error || (!isLoading && !link && publicLinkRef)) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center space-y-6">
         <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center">
