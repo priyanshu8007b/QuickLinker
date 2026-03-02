@@ -24,14 +24,14 @@ function Calendar({
         month: "space-y-4",
         month_caption: "flex justify-center pt-1 relative items-center",
         caption_label: "text-sm font-medium",
-        nav: "flex items-center absolute right-1 left-1 top-0 justify-between",
+        nav: "flex items-center absolute right-1 left-1 top-0 justify-between w-full px-2",
         button_previous: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-100 hover:opacity-100 hover:bg-accent hover:text-accent-foreground border-white/10"
+          "h-7 w-7 bg-transparent p-0 opacity-100 border-primary/20 hover:bg-primary hover:text-background transition-colors"
         ),
         button_next: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-100 hover:opacity-100 hover:bg-accent hover:text-accent-foreground border-white/10"
+          "h-7 w-7 bg-transparent p-0 opacity-100 border-primary/20 hover:bg-primary hover:text-background transition-colors"
         ),
         month_grid: "w-full border-collapse space-y-1",
         weekdays: "flex",
@@ -39,11 +39,11 @@ function Calendar({
         week: "flex w-full mt-2",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-primary hover:text-background"
         ),
         day_button: "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
         range_end: "day-range-end",
-        selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+        selected: "bg-primary text-background hover:bg-primary hover:text-background focus:bg-primary focus:text-background",
         today: "bg-accent text-accent-foreground",
         outside: "day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
         disabled: "text-muted-foreground opacity-50",
@@ -53,10 +53,10 @@ function Calendar({
       }}
       components={{
         IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("h-4 w-4 text-white", className)} {...props} />
+          <ChevronLeft className={cn("h-4 w-4 text-primary group-hover:text-background", className)} {...props} />
         ),
         IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("h-4 w-4 text-white", className)} {...props} />
+          <ChevronRight className={cn("h-4 w-4 text-primary group-hover:text-background", className)} {...props} />
         ),
       }}
       {...props}
