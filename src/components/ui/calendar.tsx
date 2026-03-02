@@ -27,11 +27,11 @@ function Calendar({
         nav: "flex items-center absolute right-1 left-1 top-0 justify-between w-full px-2",
         button_previous: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-100 border-accent/30 hover:bg-accent hover:text-black transition-colors group"
+          "h-7 w-7 bg-transparent p-0 opacity-100 border-accent/30 !text-white hover:!bg-accent hover:!text-black transition-colors group"
         ),
         button_next: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-100 border-accent/30 hover:bg-accent hover:text-black transition-colors group"
+          "h-7 w-7 bg-transparent p-0 opacity-100 border-accent/30 !text-white hover:!bg-accent hover:!text-black transition-colors group"
         ),
         month_grid: "w-full border-collapse space-y-1",
         weekdays: "flex",
@@ -52,11 +52,11 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("h-4 w-4 text-white group-hover:text-black", className)} {...props} />
+        IconLeft: ({ className: iconClass, ...props }) => (
+          <ChevronLeft className={cn("h-4 w-4 !text-inherit", iconClass)} {...props} />
         ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("h-4 w-4 text-white group-hover:text-black", className)} {...props} />
+        IconRight: ({ className: iconClass, ...props }) => (
+          <ChevronRight className={cn("h-4 w-4 !text-inherit", iconClass)} {...props} />
         ),
       }}
       {...props}
