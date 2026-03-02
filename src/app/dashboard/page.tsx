@@ -106,7 +106,7 @@ export default function Dashboard() {
                         </Link>
                         {link.expireAt && (
                           <Badge variant="outline" className="text-[10px] uppercase border-amber-500/30 text-amber-500 bg-amber-500/5">
-                            Expires: {new Date(link.expireAt).toLocaleDateString()}
+                            Link usable till: {new Date(link.expireAt).toLocaleDateString()}
                           </Badge>
                         )}
                       </div>

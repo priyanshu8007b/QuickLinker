@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import { 
   TrendingUp, Users, Smartphone, Globe, 
-  ArrowUpRight, BrainCircuit, Share2, ExternalLink, Calendar, Loader2
+  ArrowUpRight, BrainCircuit, Share2, ExternalLink, Calendar, Loader2, Clock
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase";
@@ -161,20 +161,34 @@ export function AnalyticsDashboard({ shortCode }: { shortCode: string }) {
             </p>
           </CardContent>
         </Card>
-        <Card className="glass-morphism border-white/5">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-muted-foreground">Primary Device</p>
-              <Smartphone className="w-4 h-4 text-accent" />
-            </div>
-            <p className="text-lg font-bold text-white">
-              {analyticsData.deviceTypes[0]?.name || "N/A"}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {analyticsData.totalClicks > 0 ? Math.round((analyticsData.deviceTypes[0]?.count / analyticsData.totalClicks) * 100) : 0}% share
-            </p>
-          </CardContent>
-        </Card>
+        {analyticsData.link.expireAt ? (
+          <Card className="glass-morphism border-white/5 border-amber-500/20">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-muted-foreground">Link usable till:</p>
+                <Clock className="w-4 h-4 text-amber-500" />
+              </div>
+              <p className="text-lg font-bold text-white">
+                {new Date(analyticsData.link.expireAt).toLocaleDateString()}
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="glass-morphism border-white/5">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-muted-foreground">Primary Device</p>
+                <Smartphone className="w-4 h-4 text-accent" />
+              </div>
+              <p className="text-lg font-bold text-white">
+                {analyticsData.deviceTypes[0]?.name || "N/A"}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {analyticsData.totalClicks > 0 ? Math.round((analyticsData.deviceTypes[0]?.count / analyticsData.totalClicks) * 100) : 0}% share
+              </p>
+            </CardContent>
+          </Card>
+        )}
         <Card className="glass-morphism border-white/5">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-2">

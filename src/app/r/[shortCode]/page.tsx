@@ -1,11 +1,11 @@
 
 "use client";
 
-import { useEffect, use } from "react";
+import { useEffect, use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -20,9 +20,19 @@ export default function RedirectPage({ params }: { params: Promise<{ shortCode: 
   }, [db, shortCode]);
 
   const { data: link, isLoading, error } = useDoc(publicLinkRef);
+  const [isExpired, setIsExpired] = useState(false);
 
   useEffect(() => {
     if (link && link.originalUrl && db && shortCode) {
+      // Check for expiration
+      if (link.expireAt) {
+        const expiryDate = new Date(link.expireAt);
+        if (expiryDate < new Date()) {
+          setIsExpired(true);
+          return;
+        }
+      }
+
       // Record click (non-blocking)
       const clicksRef = collection(db, "public_urls", shortCode, "clicks");
       addDoc(clicksRef, {
@@ -43,14 +53,33 @@ export default function RedirectPage({ params }: { params: Promise<{ shortCode: 
   // 1. Explicitly loading
   // 2. We have a reference but no data/error yet (initial state before hook effect runs)
   // 3. We are still waiting for the params or db to initialize
-  const isActuallyLoading = isLoading || (publicLinkRef && !link && !error) || !publicLinkRef;
+  const isActuallyLoading = isLoading || (publicLinkRef && !link && !error && !isExpired) || !publicLinkRef;
 
-  if (isActuallyLoading) {
+  if (isActuallyLoading && !isExpired) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center space-y-4">
         <Loader2 className="w-12 h-12 text-accent animate-spin" />
         <h1 className="text-xl font-bold text-white">Redirecting you...</h1>
         <p className="text-muted-foreground">Hang tight, we're getting you there fast.</p>
+      </div>
+    );
+  }
+
+  if (isExpired) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center space-y-6">
+        <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center">
+          <Clock className="w-10 h-10 text-amber-500" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-white">Link Expired</h1>
+          <p className="text-muted-foreground max-w-md">
+            The link you are trying to visit was set to expire on {new Date(link!.expireAt).toLocaleDateString()}.
+          </p>
+        </div>
+        <Button asChild className="bg-primary hover:bg-primary/90">
+          <Link href="/">Back to QuickLinker</Link>
+        </Button>
       </div>
     );
   }
@@ -65,7 +94,7 @@ export default function RedirectPage({ params }: { params: Promise<{ shortCode: 
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-white">Link Not Found</h1>
           <p className="text-muted-foreground max-w-md">
-            The short link you followed doesn't exist, has expired, or was removed.
+            The short link you followed doesn't exist or was removed.
           </p>
         </div>
         <Button asChild className="bg-primary hover:bg-primary/90">
