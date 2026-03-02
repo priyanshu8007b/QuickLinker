@@ -167,7 +167,7 @@ export function ShortenForm() {
                             <Button
                               variant={"outline"}
                               className={cn(
-                                "w-full h-12 bg-background/50 border-white/10 pl-3 text-left font-normal hover:bg-white/5",
+                                "w-full h-12 bg-background/50 border-white/10 pl-3 text-left font-normal hover:bg-white/10 hover:text-white transition-colors",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
