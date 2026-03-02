@@ -4,28 +4,28 @@
 
 @layer base {
   :root {
-    --background: 206 17% 10%;
+    --background: 222 47% 4%;
     --foreground: 0 0% 100%;
-    --card: 206 17% 12%;
+    --card: 222 47% 6%;
     --card-foreground: 0 0% 100%;
-    --popover: 206 17% 10%;
+    --popover: 222 47% 4%;
     --popover-foreground: 0 0% 100%;
-    --primary: 210 66% 36%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 206 17% 15%;
+    --secondary: 222 47% 10%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 206 17% 15%;
-    --muted-foreground: 206 10% 70%;
-    --accent: 190 100% 63%;
-    --accent-foreground: 206 17% 10%;
+    --muted: 222 47% 12%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 191 100% 50%;
+    --accent-foreground: 222 47% 4%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 206 17% 20%;
-    --input: 206 17% 20%;
-    --ring: 190 100% 63%;
-    --radius: 0.75rem;
-    --chart-1: 190 100% 63%;
-    --chart-2: 210 66% 36%;
+    --border: 217 32.6% 17.5%;
+    --input: 217 32.6% 17.5%;
+    --ring: 191 100% 50%;
+    --radius: 1rem;
+    --chart-1: 191 100% 50%;
+    --chart-2: 217 91% 60%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
@@ -38,13 +38,35 @@
   }
   body {
     @apply bg-background text-foreground font-body antialiased;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(217, 91%, 60%, 0.05) 0, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(191, 100% 50%, 0.05) 0, transparent 50%);
+    background-attachment: fixed;
   }
 }
 
 .glass-morphism {
-  @apply bg-card/50 backdrop-blur-md border border-white/10;
+  @apply bg-card/40 backdrop-blur-xl border border-white/5;
+}
+
+.glass-morphism-heavy {
+  @apply bg-card/80 backdrop-blur-2xl border border-white/10;
 }
 
 .glow-accent {
-  box-shadow: 0 0 20px rgba(66, 225, 255, 0.15);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-white/50;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
 }
